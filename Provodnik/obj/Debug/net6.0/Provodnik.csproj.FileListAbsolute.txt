@@ -1,0 +1,5 @@
+C:\Users\Глеб\Desktop\КОДЫЫЫЫ\Provodnik\Provodnik\obj\Debug\net6.0\Provodnik.csproj.AssemblyReference.cache
+C:\Users\Глеб\Desktop\КОДЫЫЫЫ\Provodnik\Provodnik\obj\Debug\net6.0\Provodnik.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Глеб\Desktop\КОДЫЫЫЫ\Provodnik\Provodnik\obj\Debug\net6.0\Provodnik.AssemblyInfoInputs.cache
+C:\Users\Глеб\Desktop\КОДЫЫЫЫ\Provodnik\Provodnik\obj\Debug\net6.0\Provodnik.AssemblyInfo.cs
+C:\Users\Глеб\Desktop\КОДЫЫЫЫ\Provodnik\Provodnik\obj\Debug\net6.0\Provodnik.csproj.CoreCompileInputs.cache
