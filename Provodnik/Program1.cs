@@ -1,139 +1,74 @@
-﻿using _7practic;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
-namespace _7practic
+namespace Practical6
 {
-    public static class File_Manager
+    public class ReadSave
     {
-        public static void Menu()
+        public static List<Figure> Read(string path)
         {
-            Console.CursorVisible = false;
-            int selection = 0;
-
-            while (true)
+            int i = 0;
+            List<Figure> figures = new List<Figure>();
+            if (path[path.Length - 1] == 't')
             {
-                Console.WriteLine("Выбор диска. Переход в меню: F1");
-                DriveInfo[] drives = DriveInfo.GetDrives();
-
-                for (int i = 0; i < drives.Length; i++)
+                string[] text = File.ReadAllLines(path);
+                do
                 {
-                    if (i == selection)
-                    {
-                        Console.BackgroundColor = ConsoleColor.White;
-                        Console.ForegroundColor = ConsoleColor.Black;
-                        Console.WriteLine($" {drives[i].Name}" + $"      Пустое пространство: {drives[i].AvailableFreeSpace / 1024 / 1024 / 1024} ГБ\n" + $"          Общий объём: {drives[i].TotalSize / 1024 / 1024 / 1024} ГБ ");
-                        Console.ResetColor();
-                    }
-                    else
-                    {
-                        Console.WriteLine($" {drives[i].Name}");
-                    }
-                }
-                switch (Console.ReadKey(true).Key)
+                    Figure newFigure = new Figure(text[i], int.Parse(text[i + 1]), int.Parse(text[i + 2]));
+                    figures.Add(newFigure);
+                    i += 3;
+                } while (text.Length > i);
+            }
+            if (path[path.Length - 1] == 'n')
+            {
+                string Text = File.ReadAllText(path);
+                figures = JsonConvert.DeserializeObject<List<Figure>>(Text);
+            }
+            if (path[path.Length - 1] == 'l')
+            {
+                XmlSerializer xml = new XmlSerializer(typeof(Figure));
+                using (FileStream fs = new FileStream(path, FileMode.Open))
                 {
-                    case ConsoleKey.F1:
-                        Options options = new Options();
-                        options.Coise();
-                        break;
-                    case ConsoleKey.DownArrow:
-                        if (selection + 1 < drives.Length)
-                        {
-                            selection++;
-                            if (selection == drives.Length)
-                            {
-                                selection = 0;
-                            }
-                        }
-                        break;
-                    case ConsoleKey.UpArrow:
-                        if (selection > 0)
-                        {
-                            selection--;
-                        }
-                        break;
-                    case ConsoleKey.Enter:
-
-                        Console.Clear();
-                        FileSystemInfo[] infos = drives[selection].RootDirectory.GetFileSystemInfos();
-                        string currentDirectory = drives[selection].Name;
-                        selection = 0;
-                        bool exit = false;
-                        while (!exit)
-                        {
-                            Console.WriteLine("  Где вы сейчас: " + currentDirectory);
-                            for (int i = 0; i < infos.Length; i++)
-                            {
-                                if (i == selection)
-                                {
-                                    Console.BackgroundColor = ConsoleColor.White;
-                                    Console.ForegroundColor = ConsoleColor.Black;
-                                    Console.WriteLine($"  {infos[i].Name}       Время: {infos[i].CreationTime}");
-                                    Console.ResetColor();
-                                }
-                                else
-                                {
-                                    Console.WriteLine($"  {infos[i].Name}");
-                                }
-                            }
-                            switch (Console.ReadKey(true).Key)
-                            {
-                                case ConsoleKey.DownArrow:
-                                    if (selection + 1 < infos.Length)
-                                    {
-                                        selection++;
-                                        if (selection == infos.Length)
-                                        {
-                                            selection = 0;
-                                        }
-                                    }
-                                    break;
-                                case ConsoleKey.UpArrow:
-                                    if (selection > 0)
-                                    {
-                                        selection--;
-                                    }
-                                    break;
-                                case ConsoleKey.Enter:
-                                    {
-                                        FileSystemInfo fileSystemInfo = infos[selection];
-                                        if (fileSystemInfo is DirectoryInfo directory)
-                                        {
-                                            currentDirectory = directory.FullName;
-                                            infos = directory.GetFileSystemInfos();
-                                            selection = 0;
-                                        }
-                                        else
-                                        {
-                                            Process.Start(new ProcessStartInfo($"{fileSystemInfo.FullName}") { UseShellExecute = true });
-                                        }
-                                    }
-                                    break;
-                                case ConsoleKey.Escape:
-                                    {
-                                        DirectoryInfo directory = Directory.GetParent(currentDirectory);
-                                        if (directory == null)
-                                        {
-                                            exit = true;
-                                        }
-                                        else
-                                        {
-                                            infos = directory.GetFileSystemInfos();
-                                            currentDirectory = directory.FullName;
-                                        }
-                                        selection = 0;
-                                    }
-                                    break;
-                            }
-                            Console.Clear();
-                        }
-                        break;
+                    figures = (List<Figure>)xml.Deserialize(fs);
                 }
-                Console.Clear();
+            }
+            return figures;
+        }
+        public static void Save(string path, List<Figure> figures)
+        {
+            int i = 0, j = 0;
+            string[] text = new string[9];
+
+            if (path[path.Length - 1] == 't')
+            {
+                do
+                {
+                    text[i] = figures[j].Name;
+                    text[i + 1] = figures[j].Height.ToString();
+                    text[i + 2] = figures[j].Width.ToString();
+                    i += 3;
+                    j++;
+                } while (text.Length > i);
+                File.WriteAllLines(path, text);
+            }
+            if (path[path.Length - 1] == 'n')
+            {
+                string json = JsonConvert.SerializeObject(figures);
+                File.WriteAllText(path, json);
+            }
+            if (path[path.Length - 1] == 'l')
+            {
+                XmlSerializer xml = new XmlSerializer(typeof(Figure));
+                using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate))
+                {
+                    xml.Serialize(fs, figures);
+                }
             }
         }
     }
